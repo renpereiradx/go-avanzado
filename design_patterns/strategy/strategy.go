@@ -7,9 +7,8 @@ type PasswordProtector struct {
 	passwordName  string
 	hashAlgorithm HashAlgorithm
 }
-
 type HashAlgorithm interface {
-	Hash(p *PasswordProtector)
+	Hash(h *PasswordProtector)
 }
 
 func NewPasswordProtector(user string, passwordName string, hash HashAlgorithm) *PasswordProtector {
@@ -20,31 +19,30 @@ func NewPasswordProtector(user string, passwordName string, hash HashAlgorithm) 
 	}
 }
 
-func (p *PasswordProtector) SetHashAlgorithm(hash HashAlgorithm) {
-	p.hashAlgorithm = hash
+func (pp *PasswordProtector) SetHashAlgorithm(hash HashAlgorithm) {
+	pp.hashAlgorithm = hash
 }
 
-func (p *PasswordProtector) Hash() {
-	p.hashAlgorithm.Hash(p)
+func (pp *PasswordProtector) Hash() {
+	pp.hashAlgorithm.Hash(pp)
 }
 
 type SHA struct{}
 
-func (SHA) Hash(p *PasswordProtector) {
-	fmt.Printf("Hashing using SHA for %s\n", p.passwordName)
+func (SHA) Hash(pp *PasswordProtector) {
+	fmt.Printf("Hashing using SHA for %s\n", pp.passwordName)
 }
 
 type MD5 struct{}
 
-func (MD5) Hash(p *PasswordProtector) {
-	fmt.Printf("Hashing using MD5 for %s\n", p.passwordName)
+func (MD5) Hash(pp *PasswordProtector) {
+	fmt.Printf("Hashing using MD5 for %s\n", pp.passwordName)
 }
 
 func main() {
-	sha := &SHA{}
+	sha := new(SHA)
 	md5 := &MD5{}
-
-	passwordProtector := NewPasswordProtector("nestor", "gmail password", sha)
+	passwordProtector := NewPasswordProtector("Hugo", "Gmail Password", sha)
 	passwordProtector.Hash()
 	passwordProtector.SetHashAlgorithm(md5)
 	passwordProtector.Hash()
