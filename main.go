@@ -2,11 +2,11 @@ package main
 
 import "fmt"
 
-// type Any struct{
-// 	Name string
-// 	LastName string
-// 	Age int32
-// }
+type Any struct {
+	Name     string
+	LastName string
+	Age      int32
+}
 
 func main() {
 	rows := [][]any{
