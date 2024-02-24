@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"log"
 	"net"
 )
 
@@ -16,8 +17,8 @@ var (
 )
 
 var (
-	host = flag.String("h", "localhost", "host")
-	port = flag.Int("p", 3090, "port")
+	host = flag.String("host", "localhost", "host")
+	port = flag.Int("port", 3090, "port")
 )
 
 func HandleConnection(connection net.Conn) {
@@ -42,5 +43,38 @@ func HandleConnection(connection net.Conn) {
 func WriteMessage(connection net.Conn, messages <-chan string) {
 	for message := range messages {
 		fmt.Fprintln(connection, message)
+	}
+}
+
+func Broadcast() {
+	clients := make((map[Client]bool))
+	for {
+		select {
+		case message := <-messages:
+			for client := range clients {
+				client <- message
+			}
+		case newClient := <-incomingClients:
+			clients[newClient] = true
+		case leavingClient := <-leavingClients:
+			delete(clients, leavingClient)
+			close(leavingClient)
+		}
+	}
+}
+
+func main() {
+	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", *host, *port))
+	if err != nil {
+		log.Fatal(err)
+	}
+	go Broadcast()
+	for {
+		connection, err := listener.Accept()
+		if err != nil {
+			log.Print(err)
+			continue
+		}
+		go HandleConnection(connection)
 	}
 }
